@@ -1,6 +1,7 @@
 import numpy as np
 import pyaudio
 
+# dictionary of notes and 'frequencies'
 NOTES =     {'0a': 110,
              '0ab': 103.82,
              '0b': 123.48,
@@ -122,11 +123,18 @@ NOTES =     {'0a': 110,
              '9g': 50176,
              '9gb': 47360.0}
 
+# maps notes to 'frequencies' (?)
 n_to_f = lambda n_list: np.array(map(NOTES.get, n_list))
 
 class Melody:
+#fs is SAMPLE RATE in pyaudio
 
-    def __init__(self, freq_list, dur_list, tamb_list, fs=44100, phaser=0, vol=.2):
+#original values
+#fs=44100
+# 44.1 KHz seems to be some kinda standard samplping rate, hmm..
+#phaser=0
+    def __init__(self, freq_list, dur_list, tamb_list, 
+                 fs=44100, phaser=0, vol=.2):
         self.fs = fs
         self.freqs = freq_list
         self.durs = dur_list
@@ -145,10 +153,16 @@ class Melody:
         self.melody = map(lambda t: self.__make_square(t[0], t[1], t[2], t[3]),
                           zip(freq_list, dur_list, tamb_list, self.attacks))
 
-    def play(self):
+    def playForever(self):
         while(True):
             for samp in self.melody:
                 self.stream.write(samp)
+
+    def play(self):
+        for samp in self.melody:
+            self.stream.write(samp)
+
+
 
     def add_and_play(self, m2):
         new_m = map(lambda t: self.__add_waves(t[0], t[1]), zip(self.melody, m2.melody))
@@ -178,10 +192,11 @@ if __name__ == "__main__":
 
     notes = ["1d","1a","2db","2e","2gb","2b","3db","1d","1a","2db","2e","2gb","2b","3db","3e","3gb"]
     b = .48/4
+    #melody init contract: frequency list, duration list, tamb list
     m = Melody(n_to_f(notes),
                [b]*len(notes),
                ([.3])*(len(notes)), phaser=0)
 
-    m.play()
+    m.playForever()
 
 
